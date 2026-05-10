@@ -10,15 +10,15 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^3.0.2",
-    "expo": "~54.0.33",
-    "expo-av": "^16.0.8",
-    "expo-blur": "^55.0.14",
-    "expo-camera": "^55.0.18",
-    "expo-font": "^55.0.7",
-    "expo-haptics": "^55.0.14",
-    "expo-linear-gradient": "^55.0.13",
-    "expo-router": "^55.0.14",
-    "expo-splash-screen": "^55.0.20",
+    "expo": "~55.0.23",
+    "expo-av": "~16.0.8",
+    "expo-blur": "~55.0.14",
+    "expo-camera": "~55.0.18",
+    "expo-font": "~55.0.7",
+    "expo-haptics": "~55.0.14",
+    "expo-linear-gradient": "~55.0.13",
+    "expo-router": "~55.0.14",
+    "expo-splash-screen": "~55.0.20",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
     "react-native": "0.81.5",
@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
+    "babel-preset-expo": "~55.0.21",
     "typescript": "~5.9.2"
   },
   "private": true
