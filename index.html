@@ -1,0 +1,1079 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>FindMyPanini — Coupe du Monde 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0E1A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
+
+<style>
+:root {
+  --ink:    #0B0E1A;
+  --ink-2:  #14182A;
+  --paper:  #F4EFE3;
+  --paper-2:#EAE2D0;
+  --turf:   #0F5132;
+  --turf-2: #1A7A4D;
+  --fire:   #FF3D2E;
+  --sun:    #FBC531;
+  --sky:    #2D6BFF;
+  --violet: #6B3FA0;
+  --line:   rgba(11,14,26,0.12);
+  --display:"Bebas Neue","Anton",Impact,sans-serif;
+  --body:   "Space Grotesk",system-ui,sans-serif;
+  --mono:   "JetBrains Mono",ui-monospace,monospace;
+}
+*,*::before,*::after{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+html,body{margin:0;padding:0;height:100%;background:#1a1a2e;font-family:var(--body)}
+#root{height:100%}
+
+/* Shell: center the phone frame on desktop, fill on mobile */
+.app-shell{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100dvh;padding:20px;
+}
+@media(max-width:430px){
+  .app-shell{padding:0;align-items:stretch;}
+}
+
+/* The phone viewport */
+.phone{
+  width:390px;height:844px;
+  position:relative;overflow:hidden;
+  border-radius:48px;
+  background:#F4EFE3;
+  box-shadow:0 40px 80px rgba(0,0,0,0.4),0 0 0 1px rgba(255,255,255,0.08);
+  flex-shrink:0;
+}
+@media(max-width:430px){
+  .phone{width:100%;height:100dvh;border-radius:0;box-shadow:none;}
+}
+
+/* Screen scroll container */
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;}
+.screen::-webkit-scrollbar{display:none}
+
+/* Dynamic island */
+.dynamic-island{
+  position:absolute;top:11px;left:50%;transform:translateX(-50%);
+  width:126px;height:37px;border-radius:24px;background:#000;z-index:50;
+  pointer-events:none;
+}
+
+/* Status bar area */
+.status-bar{
+  position:absolute;top:0;left:0;right:0;height:54px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 0;z-index:20;pointer-events:none;
+}
+.status-time{font-size:17px;font-weight:600;font-family:-apple-system,system-ui}
+.status-icons{display:flex;align-items:center;gap:6px}
+
+/* Home indicator */
+.home-indicator{
+  position:absolute;bottom:0;left:0;right:0;z-index:60;
+  height:34px;display:flex;justify-content:center;align-items:flex-end;
+  padding-bottom:8px;pointer-events:none;
+}
+.home-indicator-bar{
+  width:139px;height:5px;border-radius:100px;
+  background:rgba(0,0,0,0.2);
+}
+
+/* Design system utility classes */
+.halftone{background-image:radial-gradient(circle at 50% 50%, currentColor 20%, transparent 22%);background-size:8px 8px}
+.halftone-lg{background-size:14px 14px}
+.stripes{background-image:repeating-linear-gradient(-45deg,currentColor 0 6px,transparent 6px 12px)}
+.stripes-fine{background-image:repeating-linear-gradient(-45deg,currentColor 0 2px,transparent 2px 5px)}
+.chevron-strip{
+  background:
+    linear-gradient(135deg,transparent 33%,currentColor 33% 66%,transparent 66%) 0 0/16px 16px,
+    linear-gradient(45deg,transparent 33%,currentColor 33% 66%,transparent 66%) 0 0/16px 16px;
+}
+.perforation{
+  background-image:radial-gradient(circle,currentColor 1.4px,transparent 1.6px);
+  background-size:8px 8px;background-repeat:repeat-x;background-position:0 50%;
+}
+.holo-shine{
+  background:
+    linear-gradient(115deg,rgba(255,255,255,0) 30%,rgba(255,255,255,0.55) 45%,rgba(255,255,255,0) 60%),
+    linear-gradient(135deg,#2D6BFF,#FF3D2E 40%,#FBC531 70%,#6B3FA0);
+  background-size:200% 200%,100% 100%;
+  animation:holo 3.6s linear infinite;
+}
+.flip-card{perspective:1000px}
+.flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.flip-card.is-flipped .flip-inner{transform:rotateY(180deg)}
+.flip-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.flip-face.back{transform:rotateY(180deg)}
+.t-display{font-family:var(--display);font-weight:400;letter-spacing:0.01em;line-height:0.95}
+.t-body{font-family:var(--body)}
+.t-mono{font-family:var(--mono);font-weight:500;letter-spacing:-0.02em}
+
+@keyframes holo{0%{background-position:0% 0%,0 0}100%{background-position:200% 0%,0 0}}
+@keyframes pageOpen{0%{transform:rotateY(0deg);z-index:5}100%{transform:rotateY(-170deg);z-index:1}}
+@keyframes pulseRing{0%{transform:scale(0.96);opacity:.8}100%{transform:scale(1.4);opacity:0}}
+@keyframes scanLine{0%{transform:translateY(0%)}50%{transform:translateY(100%)}100%{transform:translateY(0%)}}
+@keyframes shineSweep{0%{transform:translateX(-120%) skewX(-15deg)}100%{transform:translateX(220%) skewX(-15deg)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+window.FMP_DATA = (function () {
+  const FRANCE = {
+    code:"FRA",name:"France",nick:"Les Bleus",
+    flag:["#0055A4","#FFFFFF","#EF4135"],
+    pageStart:86,
+    cards:[
+      {n:1,  type:"badge",  title:"Écusson",       sub:"FFF",        kit:"primary"},
+      {n:2,  type:"team",   title:"Équipe France", sub:"Team photo", kit:"primary"},
+      {n:3,  type:"player", role:"GK", name:"Mike Maignan",        num:16,age:30,caps:31},
+      {n:4,  type:"player", role:"GK", name:"Brice Samba",         num:23,age:32,caps:5},
+      {n:5,  type:"player", role:"DF", name:"Jules Koundé",        num:5, age:27,caps:39},
+      {n:6,  type:"player", role:"DF", name:"William Saliba",      num:17,age:25,caps:22},
+      {n:7,  type:"player", role:"DF", name:"Dayot Upamecano",     num:4, age:27,caps:27},
+      {n:8,  type:"player", role:"DF", name:"Ibrahima Konaté",     num:14,age:27,caps:18},
+      {n:9,  type:"player", role:"DF", name:"Theo Hernandez",      num:22,age:28,caps:36},
+      {n:10, type:"player", role:"DF", name:"Lucas Hernandez",     num:21,age:30,caps:39},
+      {n:11, type:"player", role:"DF", name:"Benjamin Pavard",     num:2, age:30,caps:53},
+      {n:12, type:"player", role:"MF", name:"Aurélien Tchouaméni", num:8, age:26,caps:36},
+      {n:13, type:"player", role:"MF", name:"Eduardo Camavinga",   num:6, age:23,caps:25},
+      {n:14, type:"player", role:"MF", name:"Adrien Rabiot",       num:12,age:31,caps:53},
+      {n:15, type:"player", role:"MF", name:"Antoine Griezmann",   num:7, age:35,caps:137},
+      {n:16, type:"player", role:"MF", name:"Youssouf Fofana",     num:13,age:27,caps:14},
+      {n:17, type:"player", role:"FW", name:"Kylian Mbappé",       num:10,age:27,caps:88,captain:true,star:true},
+      {n:18, type:"player", role:"FW", name:"Ousmane Dembélé",     num:11,age:29,caps:56},
+      {n:19, type:"player", role:"FW", name:"Marcus Thuram",       num:15,age:28,caps:22},
+      {n:20, type:"player", role:"FW", name:"Randal Kolo Muani",   num:9, age:27,caps:31},
+    ]
+  };
+  const ROLE_COLOR={GK:"#FBC531",DF:"#2D6BFF",MF:"#0F5132",FW:"#FF3D2E"};
+  const OWNED=new Set([1,2,3,5,6,9,11,12,14,17,18,20,16]);
+  const DUPES={5:2,12:3,17:2};
+  const WISH=new Set([10,15,19]);
+  const TEAMS=[
+    {code:"ARG",name:"Argentine", flag:["#75AADB","#FFFFFF","#75AADB"],owned:14,total:20},
+    {code:"BRA",name:"Brésil",    flag:["#FEDF00","#009C3B","#002776"],owned:9, total:20},
+    {code:"FRA",name:"France",    flag:["#0055A4","#FFFFFF","#EF4135"],owned:13,total:20},
+    {code:"ESP",name:"Espagne",   flag:["#AA151B","#F1BF00","#AA151B"],owned:6, total:20},
+    {code:"ENG",name:"Angleterre",flag:["#FFFFFF","#CF142B","#FFFFFF"],owned:4, total:20},
+    {code:"GER",name:"Allemagne", flag:["#000000","#DD0000","#FFCC00"],owned:11,total:20},
+    {code:"POR",name:"Portugal",  flag:["#006600","#FF0000","#FFCC00"],owned:8, total:20},
+    {code:"NED",name:"Pays-Bas",  flag:["#AE1C28","#FFFFFF","#21468B"],owned:2, total:20},
+    {code:"BEL",name:"Belgique",  flag:["#000000","#FAE042","#ED2939"],owned:7, total:20},
+    {code:"USA",name:"États-Unis",flag:["#3C3B6E","#FFFFFF","#B22234"],owned:17,total:20},
+    {code:"MEX",name:"Mexique",   flag:["#006847","#FFFFFF","#CE1126"],owned:12,total:20},
+    {code:"CAN",name:"Canada",    flag:["#D52B1E","#FFFFFF","#D52B1E"],owned:3, total:20},
+  ];
+  const TOTAL_CARDS=720;
+  const TOTAL_OWNED=312;
+  return{FRANCE,ROLE_COLOR,OWNED,DUPES,WISH,TEAMS,TOTAL_CARDS,TOTAL_OWNED};
+})();
+</script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useContext, createContext, useCallback } = React;
+
+// ─── Navigation Context ───────────────────────────────────────
+const NavCtx = createContext(null);
+function useNav() { return useContext(NavCtx); }
+
+// ─── Status Bar ──────────────────────────────────────────────
+function StatusBar({ dark = false }) {
+  const c = dark ? '#fff' : '#000';
+  return (
+    <div style={{
+      position:'absolute',top:0,left:0,right:0,height:54,
+      display:'flex',alignItems:'center',justifyContent:'space-between',
+      padding:'16px 20px 0',zIndex:20,pointerEvents:'none',
+    }}>
+      <span style={{fontFamily:'-apple-system,system-ui',fontWeight:590,fontSize:17,color:c}}>9:41</span>
+      <div style={{display:'flex',alignItems:'center',gap:6}}>
+        <svg width="19" height="12" viewBox="0 0 19 12">
+          <rect x="0" y="7.5" width="3.2" height="4.5" rx="0.7" fill={c}/>
+          <rect x="4.8" y="5" width="3.2" height="7" rx="0.7" fill={c}/>
+          <rect x="9.6" y="2.5" width="3.2" height="9.5" rx="0.7" fill={c}/>
+          <rect x="14.4" y="0" width="3.2" height="12" rx="0.7" fill={c}/>
+        </svg>
+        <svg width="27" height="13" viewBox="0 0 27 13">
+          <rect x="0.5" y="0.5" width="23" height="12" rx="3.5" stroke={c} strokeOpacity="0.35" fill="none"/>
+          <rect x="2" y="2" width="20" height="9" rx="2" fill={c}/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// ─── Shared Primitives ────────────────────────────────────────
+function PlayerPortrait({ name, role="FW", num, captain, star, size=1 }) {
+  const initials = (name||"").split(" ").filter(Boolean).map(w=>w[0]).slice(0,2).join("");
+  const rc = window.FMP_DATA.ROLE_COLOR[role]||"#0F5132";
+  return (
+    <div style={{position:"absolute",inset:0,
+      background:`radial-gradient(120% 80% at 50% 110%,${rc} 0%,${rc}cc 38%,#0B0E1A 100%)`,
+      overflow:"hidden"}}>
+      <div className="halftone halftone-lg" style={{position:"absolute",inset:0,color:"rgba(255,255,255,0.10)",mixBlendMode:"screen"}}/>
+      <div className="t-display" style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",
+        fontSize:96*size,color:"rgba(255,255,255,0.95)",textShadow:"0 4px 24px rgba(0,0,0,0.35)",letterSpacing:"0.04em"}}>{initials}</div>
+      <div style={{position:"absolute",left:0,right:0,bottom:0,height:"30%",background:"linear-gradient(180deg,transparent,rgba(0,0,0,0.55))"}}/>
+      {num!==undefined&&<div className="t-display" style={{position:"absolute",right:8*size,bottom:6*size,fontSize:28*size,color:"#fff",lineHeight:1,opacity:0.92}}>{num}</div>}
+      {captain&&<div className="t-mono" style={{position:"absolute",left:6*size,top:6*size,background:"#FBC531",color:"#0B0E1A",fontSize:9*size,padding:"2px 5px",borderRadius:3,fontWeight:700,letterSpacing:"0.1em"}}>C</div>}
+      {star&&<div style={{position:"absolute",left:6*size,bottom:8*size,width:14*size,height:14*size,background:"#FBC531",clipPath:"polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)"}}/>}
+    </div>
+  );
+}
+
+function MissingGhost({ role, type }) {
+  return (
+    <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#EAE2D0,#F4EFE3)"}}>
+      <div className="halftone" style={{position:"absolute",inset:0,color:"rgba(11,14,26,0.06)"}}/>
+      {type==="player"&&(
+        <svg viewBox="0 0 100 100" style={{position:"absolute",inset:0,width:"100%",height:"100%"}}>
+          <defs><filter id="blr"><feGaussianBlur stdDeviation="1.2"/></filter></defs>
+          <g fill="rgba(11,14,26,0.18)" filter="url(#blr)">
+            <circle cx="50" cy="40" r="14"/>
+            <path d="M22 100 C22 78, 38 66, 50 66 C62 66, 78 78, 78 100 Z"/>
+          </g>
+        </svg>
+      )}
+      {type==="badge"&&(
+        <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <div style={{width:36,height:44,background:"rgba(11,14,26,0.16)",clipPath:"polygon(50% 0,100% 18%,100% 70%,50% 100%,0 70%,0 18%)",filter:"blur(1px)"}}/>
+        </div>
+      )}
+      {type==="team"&&(
+        <div style={{position:"absolute",inset:0}}>
+          {[0,1,2,3,4].map(i=>(
+            <div key={i} style={{position:"absolute",width:8,height:8,borderRadius:8,background:"rgba(11,14,26,0.16)",filter:"blur(1px)",left:`${15+i*17}%`,top:`${50+(i%2)*8}%`}}/>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BadgeArt() {
+  return (
+    <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,#0055A4 0%,#0055A4 33%,#FFFFFF 33%,#FFFFFF 66%,#EF4135 66%)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <div className="t-display" style={{fontSize:48,color:"#FBC531",textShadow:"2px 2px 0 #0B0E1A"}}>FFF</div>
+    </div>
+  );
+}
+
+function TeamArt() {
+  return (
+    <div style={{position:"absolute",inset:0,background:"linear-gradient(160deg,#0F5132,#1A7A4D)",overflow:"hidden"}}>
+      <div className="stripes-fine" style={{position:"absolute",inset:0,color:"rgba(255,255,255,0.08)"}}/>
+      <div style={{position:"absolute",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-around",alignItems:"flex-end",padding:"0 6px"}}>
+        {Array.from({length:6}).map((_,i)=>(
+          <div key={i} style={{width:9,height:14+(i%3)*2,marginBottom:6,background:"rgba(11,14,26,0.5)",borderRadius:"4px 4px 0 0",position:"relative"}}>
+            <div style={{position:"absolute",left:"50%",top:-6,transform:"translateX(-50%)",width:6,height:6,borderRadius:6,background:"rgba(11,14,26,0.5)"}}/>
+          </div>
+        ))}
+      </div>
+      <div className="t-display" style={{position:"absolute",top:8,left:8,fontSize:18,color:"#FBC531",lineHeight:1}}>FRA<br/>2026</div>
+    </div>
+  );
+}
+
+function StickerCard({ card, state="owned", small=false, onClick, dupeCount=0, sparkle }) {
+  const W=small?86:110; const H=small?118:150;
+  const role=card.role||"FW";
+  const rc=window.FMP_DATA.ROLE_COLOR[role]||"#0F5132";
+  const isMissing=state==="missing";
+  return (
+    <div onClick={onClick} style={{
+      width:W,height:H,position:"relative",cursor:onClick?"pointer":"default",borderRadius:8,
+      background:"#fff",
+      boxShadow:isMissing?"inset 0 0 0 1.5px rgba(11,14,26,0.18)":"0 1px 0 rgba(0,0,0,0.04),0 8px 16px -8px rgba(0,0,0,0.25),inset 0 0 0 0.5px rgba(11,14,26,0.18)",
+      overflow:"hidden",transform:sparkle?"translateY(-2px)":"none",transition:"transform .25s",
+    }}>
+      <div className="t-mono" style={{position:"absolute",top:5,left:5,zIndex:4,background:isMissing?"rgba(11,14,26,0.06)":"#0B0E1A",color:isMissing?"rgba(11,14,26,0.45)":"#F4EFE3",fontSize:8,padding:"2px 5px",borderRadius:3,fontWeight:700}}>FRA{String(card.n).padStart(2,"0")}</div>
+      {dupeCount>1&&<div className="t-mono" style={{position:"absolute",top:5,right:5,zIndex:4,background:"#FBC531",color:"#0B0E1A",fontSize:8,padding:"2px 5px",borderRadius:3,fontWeight:700}}>×{dupeCount}</div>}
+      <div style={{position:"absolute",top:0,left:0,right:0,height:small?78:100,background:"#EAE2D0"}}>
+        {isMissing?<MissingGhost role={role} type={card.type}/>:card.type==="badge"?<BadgeArt/>:card.type==="team"?<TeamArt/>:<PlayerPortrait name={card.name} role={role} num={card.num} captain={card.captain} star={card.star} size={small?0.7:1}/>}
+        {!isMissing&&<div style={{position:"absolute",inset:0,pointerEvents:"none",background:"linear-gradient(115deg,transparent 30%,rgba(255,255,255,0.15) 45%,transparent 60%)"}}/>}
+      </div>
+      <div style={{position:"absolute",left:0,right:0,bottom:0,height:small?40:50,padding:"5px 7px",boxSizing:"border-box",display:"flex",flexDirection:"column",justifyContent:"center",gap:1,borderTop:`2px solid ${isMissing?"rgba(11,14,26,0.12)":rc}`,background:isMissing?"rgba(244,239,227,0.5)":"#F4EFE3"}}>
+        <div className="t-display" style={{fontSize:small?11:13,color:isMissing?"rgba(11,14,26,0.35)":"#0B0E1A",letterSpacing:"0.02em",lineHeight:1.05,textOverflow:"ellipsis",whiteSpace:"nowrap",overflow:"hidden"}}>
+          {card.type==="badge"?"ÉCUSSON":card.type==="team"?"ÉQUIPE FRANCE":(card.name||"").toUpperCase()}
+        </div>
+        <div className="t-mono" style={{fontSize:small?7:8,color:isMissing?"rgba(11,14,26,0.3)":"rgba(11,14,26,0.55)",letterSpacing:"0.06em",textTransform:"uppercase"}}>
+          {card.type==="player"?`${role} · ${card.caps} sél.`:card.sub||"FRANCE 2026"}
+        </div>
+      </div>
+      {isMissing&&<div style={{position:"absolute",inset:4,borderRadius:6,border:"1.5px dashed rgba(11,14,26,0.22)",pointerEvents:"none"}}/>}
+    </div>
+  );
+}
+
+function FmpLogo({ size=1, dark=false }) {
+  const ink=dark?"#F4EFE3":"#0B0E1A";
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:6*size}}>
+      <div style={{width:22*size,height:22*size,position:"relative",background:"#FF3D2E",borderRadius:4*size}}>
+        <div style={{position:"absolute",inset:"20%",borderRadius:"50%",border:`${2*size}px solid #F4EFE3`}}/>
+        <div style={{position:"absolute",left:"50%",top:"50%",width:3*size,height:3*size,background:"#F4EFE3",borderRadius:"50%",transform:"translate(-50%,-50%)"}}/>
+      </div>
+      <div className="t-display" style={{fontSize:17*size,color:ink,letterSpacing:"0.02em",lineHeight:1}}>
+        FIND<span style={{color:"#FF3D2E"}}>MY</span>PANINI
+      </div>
+    </div>
+  );
+}
+
+function FmpButton({ children, kind="fire", size="md", icon, onClick, style={} }) {
+  const K={fire:{bg:"#FF3D2E",fg:"#F4EFE3"},sun:{bg:"#FBC531",fg:"#0B0E1A"},ink:{bg:"#0B0E1A",fg:"#F4EFE3"},paper:{bg:"#F4EFE3",fg:"#0B0E1A"},sky:{bg:"#2D6BFF",fg:"#F4EFE3"},turf:{bg:"#0F5132",fg:"#F4EFE3"}}[kind];
+  const S={sm:{h:32,px:12,fs:12},md:{h:42,px:16,fs:14},lg:{h:52,px:22,fs:16}}[size];
+  return (
+    <button onClick={onClick} className="t-display" style={{height:S.h,padding:`0 ${S.px}px`,background:K.bg,color:K.fg,border:0,borderRadius:S.h/2,letterSpacing:"0.06em",fontSize:S.fs,display:"inline-flex",alignItems:"center",gap:8,cursor:"pointer",boxShadow:"0 4px 14px -6px rgba(0,0,0,0.4)",...style}}>
+      {icon}{children}
+    </button>
+  );
+}
+
+function FmpProgress({ pct, label, sub, color="#FF3D2E", height=10 }) {
+  return (
+    <div>
+      {(label||sub)&&(
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+          {label&&<span className="t-mono" style={{fontSize:10,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</span>}
+          {sub&&<span className="t-mono" style={{fontSize:10,opacity:0.6}}>{sub}</span>}
+        </div>
+      )}
+      <div style={{height,borderRadius:height,background:"rgba(11,14,26,0.08)",overflow:"hidden",position:"relative"}}>
+        <div style={{position:"absolute",inset:0,width:`${pct}%`,background:color,borderRadius:height}}>
+          <div className="stripes-fine" style={{position:"absolute",inset:0,color:"rgba(255,255,255,0.25)",mixBlendMode:"screen"}}/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FlagBar({ flag, height=14, vertical=false }) {
+  return (
+    <div style={{display:"flex",flexDirection:vertical?"column":"row",width:vertical?height:"100%",height:vertical?"100%":height,borderRadius:2,overflow:"hidden"}}>
+      {flag.map((c,i)=><div key={i} style={{flex:1,background:c}}/>)}
+    </div>
+  );
+}
+
+function Tag({ bg, fg, children }) {
+  return <span className="t-mono" style={{background:bg,color:fg,fontSize:8,letterSpacing:"0.06em",padding:"3px 6px",borderRadius:3,fontWeight:700}}>{children}</span>;
+}
+
+function SectionHeader({ title, right, onRight }) {
+  return (
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div className="t-display" style={{fontSize:18,color:"#0B0E1A",letterSpacing:"0.04em"}}>{title}</div>
+      {right&&<div className="t-mono" style={{fontSize:10,color:"#FF3D2E",letterSpacing:"0.08em",cursor:onRight?"pointer":"default"}} onClick={onRight}>{right} →</div>}
+    </div>
+  );
+}
+
+// ─── Icons ───────────────────────────────────────────────────
+const ScanIcon = ({color="#fff",size=18}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M3 12h18"/></svg>;
+const BookIcon = ({color="#fff",size=18}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>;
+const StarIcon = ({color="#fff",size=18}) => <svg width={size} height={size} viewBox="0 0 24 24" fill={color}><path d="M12 2l2.9 7h7.1l-5.7 4.5 2.2 7.5L12 16.8 5.5 21l2.2-7.5L2 9h7.1z"/></svg>;
+const SwapIcon = ({color="#fff",size=18}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 4v16M3 8l4-4 4 4"/><path d="M17 20V4M21 16l-4 4-4-4"/></svg>;
+const CameraIcon = ({color="#fff",size=18}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>;
+const BackIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>;
+const CloseIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>;
+
+function BackBtn({ dark=false, onClick }) {
+  const nav = useNav();
+  return (
+    <div onClick={onClick||nav.back} style={{width:36,height:36,borderRadius:18,background:dark?"rgba(255,255,255,0.08)":"rgba(11,14,26,0.55)",display:"flex",alignItems:"center",justifyContent:"center",color:"#F4EFE3",cursor:"pointer"}}>
+      <BackIcon/>
+    </div>
+  );
+}
+
+// ─── Tab Bar ─────────────────────────────────────────────────
+function FmpTabBar({ active="home" }) {
+  const nav = useNav();
+  const items=[
+    {id:"home",  label:"ACCUEIL", icon:<BookIcon color="currentColor" size={20}/>},
+    {id:"scan",  label:"SCAN",    icon:<ScanIcon color="currentColor" size={20}/>, primary:true},
+    {id:"wishlist",label:"CHASSE",icon:<StarIcon color="currentColor" size={20}/>},
+    {id:"teams", label:"ALBUM",   icon:<SwapIcon color="currentColor" size={20}/>},
+  ];
+  return (
+    <div style={{position:"absolute",left:12,right:12,bottom:14,height:64,borderRadius:32,background:"rgba(11,14,26,0.96)",backdropFilter:"blur(20px)",display:"flex",padding:6,boxShadow:"0 16px 38px -8px rgba(11,14,26,0.4)",zIndex:30}}>
+      {items.map(i=>{
+        const isActive=i.id===active;
+        return (
+          <div key={i.id} onClick={()=>nav.go(i.id)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:isActive?(i.primary?"#0B0E1A":"#FBC531"):"rgba(244,239,227,0.55)",background:isActive&&i.primary?"#FBC531":"transparent",borderRadius:26,gap:2,cursor:"pointer"}}>
+            {i.icon}
+            <div className="t-mono" style={{fontSize:7.5,letterSpacing:"0.1em",fontWeight:700}}>{i.label}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Progress Dial ───────────────────────────────────────────
+function ProgressDial({ pct }) {
+  const r=36,c=2*Math.PI*r,off=c-(pct/100)*c;
+  return (
+    <div style={{position:"relative",width:96,height:96,flexShrink:0}}>
+      <svg viewBox="0 0 100 100" width="96" height="96" style={{transform:"rotate(-90deg)"}}>
+        <circle cx="50" cy="50" r={r} stroke="rgba(11,14,26,0.08)" strokeWidth="9" fill="none"/>
+        <circle cx="50" cy="50" r={r} stroke="#FF3D2E" strokeWidth="9" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={off} fill="none"/>
+      </svg>
+      <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+        <div className="t-display" style={{fontSize:28,color:"#0B0E1A",lineHeight:1}}>{pct}<span style={{fontSize:14}}>%</span></div>
+        <div className="t-mono" style={{fontSize:7,opacity:0.5,letterSpacing:"0.1em",marginTop:2}}>COMPLET</div>
+      </div>
+    </div>
+  );
+}
+
+function ActionTile({ bg, fg, label, sub, icon, big, onClick }) {
+  return (
+    <div onClick={onClick} style={{background:bg,color:fg,borderRadius:14,padding:12,height:big?124:96,display:"flex",flexDirection:"column",justifyContent:"space-between",position:"relative",overflow:"hidden",boxShadow:"0 8px 22px -10px rgba(11,14,26,0.25)",cursor:"pointer"}}>
+      <div className="halftone" style={{position:"absolute",right:-10,bottom:-10,width:60,height:60,color:fg,opacity:0.12}}/>
+      <div style={{width:32,height:32,borderRadius:8,background:"rgba(255,255,255,0.15)",display:"flex",alignItems:"center",justifyContent:"center"}}>{icon}</div>
+      <div>
+        <div className="t-display" style={{fontSize:big?22:18,lineHeight:1,letterSpacing:"0.02em"}}>{label}</div>
+        <div className="t-mono" style={{fontSize:9,opacity:0.7,marginTop:3,letterSpacing:"0.04em"}}>{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── HOME ────────────────────────────────────────────────────
+function ScreenHome() {
+  const nav = useNav();
+  const pct=Math.round((window.FMP_DATA.TOTAL_OWNED/window.FMP_DATA.TOTAL_CARDS)*100);
+  return (
+    <div style={{minHeight:"100%",background:"#F4EFE3",paddingBottom:100}}>
+      {/* hero */}
+      <div style={{position:"relative",paddingTop:56,paddingBottom:18,background:"#0B0E1A",color:"#F4EFE3",overflow:"hidden"}}>
+        <div className="chevron-strip" style={{position:"absolute",inset:0,color:"rgba(251,197,49,0.10)"}}/>
+        <div style={{position:"absolute",right:-40,top:-20,width:180,height:180,borderRadius:"50%",background:"radial-gradient(circle,#FF3D2E 0%,transparent 60%)",opacity:0.4}}/>
+        <div style={{padding:"8px 18px 0",position:"relative"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <FmpLogo dark size={1}/>
+            <div style={{width:32,height:32,borderRadius:16,background:"rgba(255,255,255,0.12)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <div className="t-mono" style={{fontSize:11,color:"#F4EFE3"}}>MT</div>
+            </div>
+          </div>
+          <div style={{marginTop:16}}>
+            <div className="t-mono" style={{fontSize:10,color:"#FBC531",letterSpacing:"0.16em"}}>◆  COUPE DU MONDE 2026  ◆  USA · CAN · MEX</div>
+            <div className="t-display" style={{fontSize:38,lineHeight:0.92,marginTop:6,color:"#F4EFE3"}}>
+              SALUT MATTÉO,<br/><span style={{color:"#FF3D2E"}}>PLUS QUE 408 CARTES.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* progress card */}
+      <div style={{margin:"-22px 14px 0",padding:14,background:"#F4EFE3",borderRadius:14,boxShadow:"0 12px 32px -10px rgba(11,14,26,0.25)",position:"relative",zIndex:2}}>
+        <div style={{display:"flex",alignItems:"center",gap:14}}>
+          <ProgressDial pct={pct}/>
+          <div style={{flex:1}}>
+            <div className="t-mono" style={{fontSize:9,letterSpacing:"0.1em",opacity:0.55}}>MA COLLECTION</div>
+            <div className="t-display" style={{fontSize:32,lineHeight:1,color:"#0B0E1A",margin:"2px 0 4px"}}>
+              {window.FMP_DATA.TOTAL_OWNED}<span style={{opacity:0.3}}>/{window.FMP_DATA.TOTAL_CARDS}</span>
+            </div>
+            <div style={{display:"flex",gap:6}}>
+              <Tag bg="#0F5132" fg="#F4EFE3">+12 CETTE SEM.</Tag>
+              <Tag bg="#FBC531" fg="#0B0E1A">17 DOUBLONS</Tag>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* action grid */}
+      <div style={{padding:"16px 14px 0",display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+        <ActionTile big bg="#FF3D2E" fg="#F4EFE3" label="SCANNER" sub="Camera · Photo · Manuel" icon={<ScanIcon color="#F4EFE3"/>} onClick={()=>nav.go("scan")}/>
+        <ActionTile big bg="#0B0E1A" fg="#F4EFE3" label="MON ALBUM" sub="12 équipes · 720 cartes" icon={<BookIcon color="#FBC531"/>} onClick={()=>nav.go("teams")}/>
+        <ActionTile bg="#FBC531" fg="#0B0E1A" label="WISHLIST" sub="9 chasses" icon={<StarIcon color="#0B0E1A"/>} onClick={()=>nav.go("wishlist")}/>
+        <ActionTile bg="#2D6BFF" fg="#F4EFE3" label="DOUBLONS" sub="17 dispo · échange" icon={<SwapIcon color="#F4EFE3"/>} onClick={()=>nav.go("wishlist")}/>
+      </div>
+
+      {/* recent stickers */}
+      <div style={{padding:"18px 14px 0"}}>
+        <SectionHeader title="DERNIÈREMENT COLLÉS" right="VOIR TOUT" onRight={()=>nav.go("album")}/>
+        <div style={{display:"flex",gap:8,overflowX:"auto",padding:"8px 0 4px",marginLeft:-2}}>
+          {[16,17,12,5,11,18].map(n=>{
+            const c=window.FMP_DATA.FRANCE.cards.find(x=>x.n===n);
+            return c&&<StickerCard key={n} card={c} state="owned" small onClick={()=>nav.go("card-detail")}/>;
+          })}
+        </div>
+      </div>
+
+      <FmpTabBar active="home"/>
+    </div>
+  );
+}
+
+// ─── TEAMS ───────────────────────────────────────────────────
+function ScreenTeams() {
+  const nav = useNav();
+  const teams=window.FMP_DATA.TEAMS;
+  return (
+    <div style={{minHeight:"100%",background:"#F4EFE3",paddingBottom:100}}>
+      <div style={{paddingTop:56,padding:"56px 16px 0"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <BackBtn/>
+          <div className="t-display" style={{fontSize:14,letterSpacing:"0.04em"}}>MON ALBUM</div>
+          <div style={{width:36}}/>
+        </div>
+        <div className="t-display" style={{fontSize:38,lineHeight:0.95,marginTop:22}}>
+          48 ÉQUIPES.<br/><span style={{color:"#FF3D2E"}}>720 STICKERS.</span>
+        </div>
+      </div>
+      <div style={{padding:"20px 14px 0",display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+        {teams.map(t=>{
+          const pct=Math.round((t.owned/t.total)*100);
+          return (
+            <div key={t.code} onClick={()=>nav.go("album")} style={{background:"#fff",borderRadius:12,padding:12,boxShadow:"0 6px 16px -10px rgba(11,14,26,0.2)",position:"relative",overflow:"hidden",cursor:"pointer"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+                <FlagBar flag={t.flag} height={14}/>
+              </div>
+              <div className="t-display" style={{fontSize:22,lineHeight:1,color:"#0B0E1A"}}>{t.name}</div>
+              <div className="t-mono" style={{fontSize:9,marginTop:2,opacity:0.55,letterSpacing:"0.08em"}}>{t.code} · 20 stickers</div>
+              <div style={{marginTop:10}}>
+                <FmpProgress pct={pct} height={6} color={pct===100?"#0F5132":"#FF3D2E"}/>
+                <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}>
+                  <span className="t-mono" style={{fontSize:9,opacity:0.6}}>{t.owned}/{t.total}</span>
+                  <span className="t-display" style={{fontSize:14,color:pct===100?"#0F5132":"#0B0E1A"}}>{pct}%</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── SCAN ────────────────────────────────────────────────────
+function ScreenScan() {
+  const nav = useNav();
+  const [mode,setMode]=useState("camera");
+  return (
+    <div style={{minHeight:"100%",background:"#0B0E1A",color:"#F4EFE3",paddingBottom:24,position:"relative"}}>
+      {/* top bar */}
+      <div style={{paddingTop:56,padding:"56px 18px 14px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div onClick={()=>nav.back()} style={{width:36,height:36,borderRadius:18,background:"rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"#F4EFE3",cursor:"pointer"}}><CloseIcon/></div>
+          <div className="t-display" style={{fontSize:18,letterSpacing:"0.04em"}}>SCANNER</div>
+          <div style={{background:"rgba(255,255,255,0.08)",borderRadius:16,padding:"5px 9px",display:"flex",alignItems:"center",gap:5}}>
+            <div style={{width:6,height:6,borderRadius:6,background:"#FBC531",animation:"bob 1.2s ease-in-out infinite"}}/>
+            <span className="t-mono" style={{fontSize:9,letterSpacing:"0.08em"}}>FLASH</span>
+          </div>
+        </div>
+      </div>
+
+      {/* method pills */}
+      <div style={{padding:"0 18px",display:"flex",gap:6,overflowX:"auto"}}>
+        {[{id:"camera",label:"CAMÉRA"},{id:"photo",label:"PHOTO"},{id:"manual",label:"N° CARTE"},{id:"search",label:"JOUEUR"}].map(m=>(
+          <div key={m.id} onClick={()=>setMode(m.id)} className="t-mono" style={{padding:"7px 13px",borderRadius:18,fontSize:10,letterSpacing:"0.08em",background:mode===m.id?"#FBC531":"rgba(255,255,255,0.06)",color:mode===m.id?"#0B0E1A":"rgba(244,239,227,0.7)",fontWeight:700,whiteSpace:"nowrap",cursor:"pointer"}}>{m.label}</div>
+        ))}
+      </div>
+
+      {/* viewfinder */}
+      <div style={{padding:"16px 18px 0",position:"relative"}}>
+        <div style={{position:"relative",aspectRatio:"3/4",borderRadius:18,overflow:"hidden",background:"linear-gradient(160deg,#14182A 0%,#0B0E1A 60%,#1A2540 100%)",boxShadow:"inset 0 0 0 1px rgba(255,255,255,0.06)"}}>
+          {/* fake camera content */}
+          <div style={{position:"absolute",inset:0}}>
+            <div className="halftone" style={{position:"absolute",inset:0,color:"rgba(255,255,255,0.04)"}}/>
+            <div style={{position:"absolute",left:"26%",top:"30%",width:"48%",aspectRatio:"3/4",transform:"rotate(-3deg)",borderRadius:6,background:"#fff",boxShadow:"0 18px 40px -8px rgba(0,0,0,0.6)",overflow:"hidden"}}>
+              <div style={{position:"absolute",left:0,right:0,top:0,height:"70%",background:"linear-gradient(160deg,#FF3D2E,#C03020)"}}>
+                <div className="t-display" style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:78,color:"#fff",textShadow:"0 4px 18px rgba(0,0,0,.3)"}}>KM</div>
+                <div className="t-mono" style={{position:"absolute",top:8,left:8,color:"#FBC531",background:"#0B0E1A",fontSize:9,padding:"2px 5px",borderRadius:3}}>FRA17</div>
+              </div>
+              <div style={{position:"absolute",left:0,right:0,bottom:0,height:"30%",background:"#F4EFE3",display:"flex",alignItems:"center",padding:"0 8px",borderTop:"3px solid #FBC531"}}>
+                <div className="t-display" style={{fontSize:11,color:"#0B0E1A"}}>K. MBAPPÉ</div>
+              </div>
+            </div>
+          </div>
+          {/* brackets */}
+          {[{top:22,left:22,b:{borderTop:"3px solid #FBC531",borderLeft:"3px solid #FBC531"}},{top:22,right:22,b:{borderTop:"3px solid #FBC531",borderRight:"3px solid #FBC531"}},{bottom:22,left:22,b:{borderBottom:"3px solid #FBC531",borderLeft:"3px solid #FBC531"}},{bottom:22,right:22,b:{borderBottom:"3px solid #FBC531",borderRight:"3px solid #FBC531"}}].map((c,i)=>(
+            <div key={i} style={{position:"absolute",width:26,height:26,...c,...c.b,borderRadius:4}}/>
+          ))}
+          {/* scan line */}
+          <div style={{position:"absolute",left:"10%",right:"10%",height:2,background:"linear-gradient(90deg,transparent,#FBC531,transparent)",top:"12%",animation:"scanLine 2.4s ease-in-out infinite",boxShadow:"0 0 14px #FBC531"}}/>
+          {/* detected pill */}
+          <div style={{position:"absolute",left:14,top:14,padding:"4px 8px 4px 6px",background:"rgba(11,14,26,0.78)",borderRadius:14,display:"flex",alignItems:"center",gap:6}}>
+            <div style={{width:16,height:16,borderRadius:8,position:"relative",background:"#FF3D2E"}}>
+              <div style={{position:"absolute",inset:0,background:"rgba(251,197,49,0.35)",borderRadius:8,animation:"pulseRing 1.4s ease-out infinite"}}/>
+            </div>
+            <div className="t-mono" style={{fontSize:9,letterSpacing:"0.08em",color:"#FBC531"}}>CARTE DÉTECTÉE</div>
+          </div>
+        </div>
+
+        {/* hint */}
+        <div style={{marginTop:14,padding:"10px 14px",background:"rgba(255,255,255,0.05)",borderRadius:12,display:"flex",alignItems:"center",gap:10}}>
+          <div style={{width:28,height:28,borderRadius:14,background:"#FF3D2E",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><CameraIcon color="#fff" size={14}/></div>
+          <div>
+            <div className="t-display" style={{fontSize:14,letterSpacing:"0.02em"}}>POSE LA CARTE À PLAT</div>
+            <div className="t-mono" style={{fontSize:9,opacity:0.6,marginTop:2}}>Numéro lisible · bonne lumière · cadre vert</div>
+          </div>
+        </div>
+      </div>
+
+      {/* shutter */}
+      <div style={{marginTop:22,display:"flex",justifyContent:"center",alignItems:"center",gap:30}}>
+        <div style={{width:44,height:44,borderRadius:22,background:"rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"#F4EFE3",fontSize:18}}>◧</div>
+        <div onClick={()=>nav.go("scan-result")} style={{width:76,height:76,borderRadius:38,border:"3px solid #F4EFE3",display:"flex",alignItems:"center",justifyContent:"center",position:"relative",cursor:"pointer"}}>
+          <div style={{width:60,height:60,borderRadius:30,background:"#FF3D2E",animation:"pulseRing 1.6s ease-out infinite"}}/>
+          <div style={{position:"absolute",inset:8,borderRadius:30,background:"#FF3D2E"}}/>
+        </div>
+        <div style={{width:44,height:44,borderRadius:22,background:"rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"#F4EFE3",fontSize:18}}>✕</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SCAN RESULT ─────────────────────────────────────────────
+function ScreenScanResult() {
+  const nav = useNav();
+  const [view,setView]=useState("animation");
+  const card=window.FMP_DATA.FRANCE.cards.find(c=>c.n===17);
+  return (
+    <div style={{minHeight:"100%",background:"#0B0E1A",color:"#F4EFE3",paddingBottom:110,position:"relative"}}>
+      <div style={{paddingTop:56,padding:"56px 18px 8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div onClick={nav.back} style={{width:36,height:36,borderRadius:18,background:"rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center",color:"#F4EFE3",cursor:"pointer"}}><CloseIcon/></div>
+        <div className="t-mono" style={{fontSize:9,letterSpacing:"0.1em",color:"#FBC531"}}>● SCAN RÉUSSI · 0.42S</div>
+        <div style={{width:36}}/>
+      </div>
+
+      <div style={{padding:"10px 18px 6px"}}>
+        <div className="t-mono" style={{fontSize:10,opacity:0.55,letterSpacing:"0.12em"}}>CARTE IDENTIFIÉE</div>
+        <div className="t-display" style={{fontSize:30,lineHeight:1,marginTop:4}}>KYLIAN <span style={{color:"#FF3D2E"}}>MBAPPÉ</span></div>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}>
+          <FlagBar flag={["#0055A4","#FFFFFF","#EF4135"]} height={10}/>
+          <span className="t-mono" style={{fontSize:9,letterSpacing:"0.08em",opacity:0.7}}>FRA · #FRA17 · ATTAQUANT</span>
+        </div>
+      </div>
+
+      {/* toggle */}
+      <div style={{margin:"14px 18px 0",padding:4,background:"rgba(255,255,255,0.06)",borderRadius:22,display:"flex"}}>
+        {[{id:"animation",label:"ANIMATION 3D",icon:"▶"},{id:"summary",label:"RÉSUMÉ RAPIDE",icon:"≡"}].map(t=>(
+          <div key={t.id} onClick={()=>setView(t.id)} className="t-display" style={{flex:1,padding:"9px 10px",textAlign:"center",background:view===t.id?"#FBC531":"transparent",color:view===t.id?"#0B0E1A":"rgba(244,239,227,0.6)",borderRadius:18,fontSize:12,letterSpacing:"0.06em",cursor:"pointer"}}>{t.label}</div>
+        ))}
+      </div>
+
+      <div style={{padding:"16px 18px 0"}}>
+        {view==="animation"?<AlbumFlipAnim/>:<ScanSummary card={card}/>}
+      </div>
+
+      <div style={{position:"absolute",left:18,right:18,bottom:22,display:"flex",gap:8}}>
+        <FmpButton kind="paper" size="md" style={{flex:1,justifyContent:"center"}} onClick={()=>nav.go("scan")}>NOUVEAU SCAN</FmpButton>
+        <FmpButton kind="fire" size="md" style={{flex:1.4,justifyContent:"center"}} onClick={nav.back}>COLLER ✓</FmpButton>
+      </div>
+    </div>
+  );
+}
+
+function AlbumFlipAnim() {
+  return (
+    <div style={{position:"relative",aspectRatio:"1/1",borderRadius:16,overflow:"hidden",background:"radial-gradient(120% 80% at 50% 100%,#1A2540,#0B0E1A 70%)",perspective:1200}}>
+      <div className="halftone" style={{position:"absolute",inset:0,color:"rgba(251,197,49,0.06)"}}/>
+      <div style={{position:"absolute",left:"16%",right:"16%",top:"18%",bottom:"12%",transformStyle:"preserve-3d",transform:"rotateX(28deg) rotateY(-8deg)"}}>
+        <div style={{position:"absolute",inset:0,borderRadius:6,background:"linear-gradient(110deg,#14182A,#0B0E1A)",boxShadow:"0 30px 60px -10px rgba(0,0,0,0.6)"}}/>
+        {/* right page */}
+        <div style={{position:"absolute",right:0,top:0,bottom:0,width:"50%",background:"#F4EFE3",borderRadius:"0 6px 6px 0",padding:6,boxSizing:"border-box"}}>
+          <div style={{width:"100%",height:"100%",display:"grid",gridTemplateColumns:"repeat(2,1fr)",gridTemplateRows:"repeat(5,1fr)",gap:3,padding:4,boxSizing:"border-box"}}>
+            {Array.from({length:10}).map((_,i)=>(
+              <div key={i} style={{background:i===4?"#FF3D2E":"rgba(11,14,26,0.08)",borderRadius:2,boxShadow:i===4?"0 0 0 2px #FBC531,0 0 14px #FF3D2E":"none",animation:i===4?"bob 1.4s ease-in-out infinite":"none"}}/>
+            ))}
+          </div>
+        </div>
+        {/* left flipping page */}
+        <div style={{position:"absolute",left:0,top:0,bottom:0,width:"50%",background:"#EAE2D0",borderRadius:"6px 0 0 6px",transformOrigin:"right center",transformStyle:"preserve-3d",animation:"pageOpen 3s cubic-bezier(.6,.2,.4,1) infinite alternate",padding:6,boxSizing:"border-box"}}>
+          <div style={{width:"100%",height:"100%",display:"grid",gridTemplateColumns:"repeat(2,1fr)",gridTemplateRows:"repeat(5,1fr)",gap:3,padding:4,boxSizing:"border-box"}}>
+            {Array.from({length:10}).map((_,i)=><div key={i} style={{background:"rgba(11,14,26,0.06)",borderRadius:2}}/>)}
+          </div>
+        </div>
+        <div className="t-mono" style={{position:"absolute",right:-54,top:-10,background:"#FBC531",color:"#0B0E1A",fontSize:10,padding:"4px 7px",borderRadius:4,fontWeight:700,letterSpacing:"0.06em",transform:"rotate(8deg)"}}>PAGE 86</div>
+      </div>
+      <div style={{position:"absolute",left:14,right:14,bottom:12,textAlign:"center"}}>
+        <div className="t-display" style={{fontSize:16,color:"#F4EFE3"}}>PAGE <span style={{color:"#FBC531"}}>86</span> · CASE <span style={{color:"#FBC531"}}>5</span></div>
+        <div className="t-mono" style={{fontSize:9,opacity:0.55,marginTop:3}}>section · france</div>
+      </div>
+    </div>
+  );
+}
+
+function ScanSummary({ card }) {
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+      <div style={{background:"linear-gradient(135deg,#FF3D2E,#C0301F)",color:"#F4EFE3",borderRadius:14,padding:16,position:"relative",overflow:"hidden"}}>
+        <div className="halftone halftone-lg" style={{position:"absolute",inset:0,color:"rgba(251,197,49,0.18)"}}/>
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",position:"relative"}}>
+          <div>
+            <div className="t-mono" style={{fontSize:9,letterSpacing:"0.12em",opacity:0.85}}>EMPLACEMENT</div>
+            <div className="t-display" style={{fontSize:56,lineHeight:0.9,marginTop:4}}>P.<span style={{color:"#FBC531"}}>86</span></div>
+            <div className="t-mono" style={{fontSize:11,marginTop:6,letterSpacing:"0.08em"}}>CASE 5 · LIGNE 3 · COL. 1</div>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
+            <FlagBar flag={["#0055A4","#FFFFFF","#EF4135"]} height={14}/>
+            <div className="t-display" style={{fontSize:28,lineHeight:1,color:"#FBC531"}}>FRA</div>
+          </div>
+        </div>
+      </div>
+      {[["Section","France · Page 86–87"],["Numéro","FRA17 (sticker rouge)"],["Voisins","Tchouaméni · Camavinga · Rabiot"],["Statut","DÉJÀ COLLÉE — tu en as 2"],["Rareté","★★★★☆  — Légende"]].map(([k,v])=>(
+        <div key={k} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"11px 14px",background:"rgba(255,255,255,0.05)",borderRadius:10}}>
+          <span className="t-mono" style={{fontSize:10,opacity:0.55,letterSpacing:"0.1em"}}>{k.toUpperCase()}</span>
+          <span className="t-body" style={{fontSize:13,fontWeight:500}}>{v}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── ALBUM ───────────────────────────────────────────────────
+function ScreenAlbum() {
+  const nav = useNav();
+  const {OWNED,DUPES,FRANCE}=window.FMP_DATA;
+  const cards=FRANCE.cards;
+  const ownedCount=cards.filter(c=>OWNED.has(c.n)).length;
+  const pct=Math.round((ownedCount/cards.length)*100);
+
+  return (
+    <div style={{minHeight:"100%",background:"#F4EFE3",paddingBottom:100}}>
+      {/* header — french flag */}
+      <div style={{position:"relative",paddingTop:48,paddingBottom:18,background:"linear-gradient(180deg,#0055A4 0%,#0055A4 33%,#F4EFE3 33%,#F4EFE3 66%,#EF4135 66%)",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(180deg,rgba(11,14,26,0.55) 0%,rgba(11,14,26,0) 70%)"}}/>
+        <div style={{padding:"10px 16px 0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <BackBtn/>
+          <div className="t-mono" style={{fontSize:9,letterSpacing:"0.14em",color:"#F4EFE3",background:"rgba(11,14,26,0.55)",padding:"5px 9px",borderRadius:12}}>SECTION 06 / 48</div>
+          <div style={{width:36}}/>
+        </div>
+        <div style={{padding:"18px 16px 0",color:"#0B0E1A"}}>
+          <div className="t-mono" style={{fontSize:10,letterSpacing:"0.14em",opacity:0.7}}>GROUPE D · UEFA</div>
+          <div className="t-display" style={{fontSize:56,lineHeight:0.85,marginTop:4}}>FRANCE</div>
+          <div style={{display:"flex",gap:10,marginTop:6,fontSize:11}}>
+            <span className="t-mono" style={{letterSpacing:"0.1em"}}>LES BLEUS</span>
+            <span className="t-mono" style={{letterSpacing:"0.1em",color:"#FF3D2E"}}>★ 2x CHAMPION</span>
+          </div>
+        </div>
+      </div>
+
+      {/* progress strip */}
+      <div style={{margin:"-14px 14px 0",padding:12,background:"#fff",borderRadius:12,boxShadow:"0 10px 26px -10px rgba(11,14,26,0.2)",position:"relative",zIndex:2}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:8}}>
+          <div>
+            <span className="t-display" style={{fontSize:26,color:"#0B0E1A",lineHeight:1}}>{ownedCount}</span>
+            <span className="t-mono" style={{fontSize:12,opacity:0.4,marginLeft:4}}>/ {cards.length}</span>
+            <span className="t-mono" style={{fontSize:10,marginLeft:10,color:"#FF3D2E",letterSpacing:"0.08em"}}>{pct}% · {cards.length-ownedCount} À CHASSER</span>
+          </div>
+          <div className="t-mono" style={{fontSize:10,color:"rgba(11,14,26,0.5)",letterSpacing:"0.08em"}}>P. 86–87</div>
+        </div>
+        <FmpProgress pct={pct} color="#FF3D2E" height={8}/>
+        <div style={{display:"flex",gap:12,marginTop:12}}>
+          {[["GK","2/2","#FBC531"],["DEF","5/7","#2D6BFF"],["MIL","3/5","#0F5132"],["ATT","3/4","#FF3D2E"]].map(([k,v,c])=>(
+            <div key={k} style={{flex:1,textAlign:"center"}}>
+              <div style={{height:3,background:c,borderRadius:2,marginBottom:5}}/>
+              <div className="t-display" style={{fontSize:14}}>{v}</div>
+              <div className="t-mono" style={{fontSize:8,opacity:0.5,letterSpacing:"0.1em"}}>{k}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* filter chips */}
+      <div style={{padding:"14px 14px 0",display:"flex",gap:6,overflowX:"auto"}}>
+        {["TOUTES (20)","MANQUANTES (7)","DOUBLONS (3)","WISHLIST (3)"].map((c,i)=>(
+          <div key={c} className="t-mono" style={{padding:"6px 11px",borderRadius:14,fontSize:9,letterSpacing:"0.08em",background:i===0?"#0B0E1A":"rgba(11,14,26,0.06)",color:i===0?"#FBC531":"rgba(11,14,26,0.7)",fontWeight:700,whiteSpace:"nowrap",cursor:"pointer"}}>{c}</div>
+        ))}
+      </div>
+
+      {/* card grid */}
+      <div style={{padding:"14px 14px 0",display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+        {cards.map(card=>{
+          const has=OWNED.has(card.n);
+          const dupe=DUPES[card.n]||0;
+          return (
+            <div key={card.n} style={{display:"flex",justifyContent:"center"}}>
+              <StickerCard card={card} state={has?"owned":"missing"} dupeCount={dupe} onClick={()=>nav.go("card-detail")}/>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* pagination */}
+      <div style={{padding:"16px 14px 0",textAlign:"center"}}>
+        <div className="perforation" style={{height:8,color:"rgba(11,14,26,0.25)",margin:"0 4px"}}/>
+        <div className="t-mono" style={{fontSize:9,opacity:0.5,marginTop:6,letterSpacing:"0.12em"}}>◀  PAGE 85 · ESPAGNE   |   PAGE 88 · ALLEMAGNE  ▶</div>
+      </div>
+
+      <FmpTabBar active="home"/>
+    </div>
+  );
+}
+
+// ─── CARD DETAIL ─────────────────────────────────────────────
+function ScreenCardDetail() {
+  const nav = useNav();
+  const card=window.FMP_DATA.FRANCE.cards.find(c=>c.n===17);
+  const [flipped,setFlipped]=useState(false);
+  return (
+    <div style={{minHeight:"100%",background:"linear-gradient(180deg,#0B0E1A,#14182A)",color:"#F4EFE3",paddingBottom:110,position:"relative"}}>
+      <div className="halftone halftone-lg" style={{position:"absolute",inset:0,color:"rgba(251,197,49,0.05)",pointerEvents:"none"}}/>
+      <div style={{paddingTop:56,padding:"56px 18px 0",display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative"}}>
+        <BackBtn dark/>
+        <div className="t-mono" style={{fontSize:9,letterSpacing:"0.12em",color:"#FBC531"}}>FRA17 · ★★★★☆</div>
+        <div style={{width:36,height:36,borderRadius:18,background:"rgba(255,255,255,0.08)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F4EFE3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
+        </div>
+      </div>
+
+      {/* flip card */}
+      <div style={{padding:"20px 18px 0",display:"flex",justifyContent:"center",position:"relative"}}>
+        <div className={"flip-card "+(flipped?"is-flipped":"")} onClick={()=>setFlipped(!flipped)} style={{width:220,height:304,position:"relative",filter:"drop-shadow(0 24px 50px rgba(11,14,26,0.6))",cursor:"pointer"}}>
+          <div className="flip-inner">
+            {/* front */}
+            <div className="flip-face" style={{borderRadius:12,overflow:"hidden",background:"#fff"}}>
+              <div style={{position:"absolute",left:0,right:0,top:0,height:"70%",background:"linear-gradient(160deg,#FF3D2E,#C0301F)",overflow:"hidden"}}>
+                <div className="halftone halftone-lg" style={{position:"absolute",inset:0,color:"rgba(251,197,49,0.18)"}}/>
+                <div style={{position:"absolute",top:0,bottom:0,width:"40%",background:"linear-gradient(115deg,transparent 30%,rgba(255,255,255,0.6) 50%,transparent 70%)",animation:"shineSweep 3.4s ease-in-out infinite"}}/>
+                <div className="t-display" style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:140,color:"#fff",lineHeight:1,textShadow:"0 8px 24px rgba(0,0,0,0.3)"}}>KM</div>
+                <div className="t-mono" style={{position:"absolute",top:10,left:10,color:"#0B0E1A",background:"#FBC531",fontSize:11,padding:"3px 7px",borderRadius:4,fontWeight:700}}>FRA17</div>
+                <div style={{position:"absolute",top:10,right:10,background:"rgba(11,14,26,0.85)",color:"#FBC531",fontSize:10,padding:"3px 7px",borderRadius:4,letterSpacing:"0.1em",fontFamily:"var(--mono)",fontWeight:700}}>★ LÉGENDE</div>
+                <div style={{position:"absolute",left:10,bottom:10,width:24,height:24,background:"#FBC531",clipPath:"polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)"}}/>
+                <div className="t-display" style={{position:"absolute",right:10,bottom:6,fontSize:56,color:"#fff",lineHeight:1}}>10</div>
+              </div>
+              <div style={{position:"absolute",left:0,right:0,bottom:0,height:"30%",background:"#F4EFE3",borderTop:"4px solid #FBC531",padding:"12px 14px",boxSizing:"border-box"}}>
+                <div className="t-mono" style={{fontSize:9,color:"rgba(11,14,26,0.5)",letterSpacing:"0.1em"}}>FRANCE · ATT</div>
+                <div className="t-display" style={{fontSize:24,color:"#0B0E1A",lineHeight:0.95,marginTop:4}}>K. MBAPPÉ</div>
+                <div className="t-mono" style={{fontSize:9,color:"rgba(11,14,26,0.5)",marginTop:4}}>PARIS · 27 ANS · 88 SÉL.</div>
+              </div>
+            </div>
+            {/* back */}
+            <div className="flip-face back holo-shine" style={{borderRadius:12,overflow:"hidden"}}>
+              <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:"#fff",padding:24,textAlign:"center",textShadow:"0 2px 8px rgba(0,0,0,0.4)"}}>
+                <div className="t-display" style={{fontSize:18,letterSpacing:"0.06em"}}>STATS 25/26</div>
+                <div className="t-display" style={{fontSize:78,lineHeight:0.9,margin:"8px 0"}}>34</div>
+                <div className="t-mono" style={{fontSize:11,letterSpacing:"0.1em"}}>BUTS EN CLUB</div>
+                <div className="perforation" style={{width:"60%",height:6,color:"rgba(255,255,255,0.5)",margin:"16px 0"}}/>
+                <div className="t-mono" style={{fontSize:11}}>12 PASSES · 41 MATCHS</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="t-mono" style={{textAlign:"center",fontSize:9,opacity:0.5,marginTop:10,letterSpacing:"0.12em"}}>TAP POUR RETOURNER ↻</div>
+
+      {/* stats */}
+      <div style={{padding:"20px 18px 0",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+        {[["88","SÉL."],["52","BUTS"],["27","ANS"],["★★★★","RARETÉ"],["×2","DOUBLONS"],["3.2k","TROUVÉE PAR"]].map(([v,k])=>(
+          <div key={k} style={{background:"rgba(255,255,255,0.05)",borderRadius:10,padding:"10px 8px",textAlign:"center"}}>
+            <div className="t-display" style={{fontSize:22,color:"#FBC531",lineHeight:1}}>{v}</div>
+            <div className="t-mono" style={{fontSize:8,opacity:0.55,marginTop:4,letterSpacing:"0.08em"}}>{k}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* actions */}
+      <div style={{padding:"20px 18px 0",display:"flex",flexDirection:"column",gap:8}}>
+        <div style={{display:"flex",gap:8}}>
+          <FmpButton kind="fire" size="md" style={{flex:1,justifyContent:"center"}} icon={<ScanIcon size={14} color="#fff"/>} onClick={()=>nav.go("scan-result")}>LOCALISER ▶</FmpButton>
+          <FmpButton kind="sun" size="md" style={{flex:1,justifyContent:"center"}}>ÉCHANGER ↔</FmpButton>
+        </div>
+        <div style={{padding:"12px 14px",background:"rgba(255,255,255,0.05)",borderRadius:12,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div className="t-display" style={{fontSize:14}}>2 DOUBLONS</div>
+            <div className="t-mono" style={{fontSize:9,opacity:0.6,marginTop:2}}>Marquer dispo pour échange</div>
+          </div>
+          <div style={{width:44,height:26,borderRadius:14,background:"#FBC531",padding:2,display:"flex",alignItems:"center",justifyContent:"flex-end"}}>
+            <div style={{width:22,height:22,borderRadius:11,background:"#0B0E1A"}}/>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── WISHLIST ────────────────────────────────────────────────
+function ScreenWishlist() {
+  const nav = useNav();
+  const {FRANCE,WISH,DUPES}=window.FMP_DATA;
+  const cards=FRANCE.cards;
+  const wishCards=cards.filter(c=>WISH.has(c.n));
+  const dupeEntries=Object.entries(DUPES).map(([n,count])=>({card:cards.find(c=>c.n===Number(n)),count}));
+
+  return (
+    <div style={{minHeight:"100%",background:"#F4EFE3",paddingBottom:100}}>
+      {/* header */}
+      <div style={{position:"relative",paddingTop:50,padding:"50px 18px 24px",background:"#FBC531",color:"#0B0E1A",overflow:"hidden"}}>
+        <div className="halftone halftone-lg" style={{position:"absolute",inset:0,color:"rgba(11,14,26,0.07)"}}/>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",position:"relative"}}>
+          <BackBtn/>
+          <div className="t-mono" style={{fontSize:10,letterSpacing:"0.14em"}}>CHASSE</div>
+          <div style={{width:36}}/>
+        </div>
+        <div style={{marginTop:16,position:"relative"}}>
+          <div className="t-display" style={{fontSize:40,lineHeight:0.92}}>CARTES À<br/>CHASSER</div>
+          <div className="t-mono" style={{fontSize:11,marginTop:6,letterSpacing:"0.1em"}}>★ 9 EN WISHLIST · ↔ 17 DOUBLONS DISPO</div>
+        </div>
+      </div>
+
+      {/* segment */}
+      <div style={{margin:"14px 14px 0",padding:4,background:"rgba(11,14,26,0.06)",borderRadius:22,display:"flex"}}>
+        <div className="t-display" style={{flex:1,padding:"9px 10px",textAlign:"center",background:"#0B0E1A",color:"#FBC531",borderRadius:18,fontSize:12,letterSpacing:"0.06em"}}>★ WISHLIST</div>
+        <div className="t-display" style={{flex:1,padding:"9px 10px",textAlign:"center",color:"rgba(11,14,26,0.55)",fontSize:12,letterSpacing:"0.06em",cursor:"pointer"}}>↔ DOUBLONS</div>
+      </div>
+
+      {/* wishlist */}
+      <div style={{padding:"16px 14px 0",display:"flex",flexDirection:"column",gap:8}}>
+        {wishCards.map(c=>(
+          <div key={c.n} style={{background:"#fff",borderRadius:12,padding:10,display:"flex",alignItems:"center",gap:12,boxShadow:"0 4px 14px -8px rgba(11,14,26,0.2)"}}>
+            <StickerCard card={c} state="missing" small/>
+            <div style={{flex:1}}>
+              <div className="t-display" style={{fontSize:16,color:"#0B0E1A"}}>{(c.name||"").toUpperCase()}</div>
+              <div className="t-mono" style={{fontSize:9,opacity:0.55,letterSpacing:"0.06em",marginTop:2}}>FRA{String(c.n).padStart(2,"0")} · {c.role} · #{c.num}</div>
+              <div style={{display:"flex",gap:6,marginTop:8,alignItems:"center"}}>
+                <span className="t-mono" style={{background:"#0F5132",color:"#F4EFE3",fontSize:9,padding:"3px 6px",borderRadius:3,letterSpacing:"0.06em"}}>4 ÉCHANGES POSSIBLES</span>
+              </div>
+            </div>
+            <div style={{width:38,height:38,borderRadius:19,background:"#FF3D2E",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",cursor:"pointer"}}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* doublons */}
+      <div style={{padding:"20px 14px 8px"}}>
+        <SectionHeader title="MES DOUBLONS À ÉCHANGER" right="GÉRER"/>
+      </div>
+      <div style={{padding:"0 14px",display:"flex",gap:8,overflowX:"auto",paddingBottom:4}}>
+        {dupeEntries.map(({card,count})=>(
+          <div key={card.n} style={{position:"relative"}}>
+            <StickerCard card={card} state="owned" dupeCount={count} small/>
+          </div>
+        ))}
+      </div>
+
+      <FmpTabBar active="wishlist"/>
+    </div>
+  );
+}
+
+// ─── PREMIUM ─────────────────────────────────────────────────
+function ScreenPremium() {
+  const nav = useNav();
+  return (
+    <div style={{minHeight:"100%",background:"#0B0E1A",color:"#F4EFE3",paddingBottom:110,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:-80,right:-80,width:260,height:260,borderRadius:"50%",background:"radial-gradient(circle,#FF3D2E 0%,transparent 65%)",opacity:0.6}}/>
+      <div className="halftone halftone-lg" style={{position:"absolute",inset:0,color:"rgba(251,197,49,0.06)"}}/>
+
+      <div style={{paddingTop:56,padding:"56px 18px 0",position:"relative"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <BackBtn dark/>
+          <div className="t-mono" style={{fontSize:9,opacity:0.55,letterSpacing:"0.14em"}}>FMP PRO</div>
+          <div style={{width:36}}/>
+        </div>
+        <div style={{marginTop:24}}>
+          <div className="t-mono" style={{fontSize:10,color:"#FBC531",letterSpacing:"0.18em"}}>◆ DEVIENS PRO</div>
+          <div className="t-display" style={{fontSize:44,lineHeight:0.92,marginTop:6}}>ZÉRO PUB.<br/><span style={{color:"#FBC531"}}>SCAN ILLIMITÉ.</span></div>
+          <div className="t-body" style={{fontSize:13,opacity:0.7,marginTop:10}}>Soutiens le projet. Coupe la pub. Débloque tout pour la Coupe du Monde 2026.</div>
+        </div>
+      </div>
+
+      <div style={{padding:"20px 18px 0",display:"flex",flexDirection:"column",gap:10,position:"relative"}}>
+        {[
+          {tag:"GRATUIT",tagBg:"rgba(255,255,255,0.12)",tagFg:"#F4EFE3",title:"ESSENTIEL",price:"0€",sub:"avec pub · scan limité 5/jour",features:["Album & scan basique","Pub bannière + interstitiel","Wishlist (max 10)","Pas d'export"],cta:"CONTINUER GRATUIT",ctaKind:"paper"},
+          {tag:"POPULAIRE",tagBg:"#FBC531",tagFg:"#0B0E1A",title:"PRO MENSUEL",price:"2,99€",sub:"par mois · sans engagement",features:["Zéro publicité","Scan illimité","Wishlist & doublons illimités","Export PDF de l'album"],cta:"ESSAYER 7 JOURS",ctaKind:"sun",highlight:true},
+          {tag:"MEILLEURE OFFRE",tagBg:"#FF3D2E",tagFg:"#F4EFE3",title:"PRO COUPE DU MONDE",price:"9,99€",sub:"paiement unique · jusqu'au 19 juillet 2026",features:["Tout PRO inclus","Cartes en 3D AR","Statistiques live des matchs","Badge Mattéo & Théo"],cta:"ACHETER LE PASS",ctaKind:"fire"},
+        ].map(plan=>(
+          <div key={plan.title} style={{background:plan.highlight?"linear-gradient(160deg,#14182A,#1A2540)":"rgba(255,255,255,0.05)",border:plan.highlight?"1.5px solid #FBC531":"1px solid rgba(255,255,255,0.08)",borderRadius:14,padding:14,position:"relative"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+              <span className="t-mono" style={{background:plan.tagBg,color:plan.tagFg,fontSize:9,padding:"3px 7px",borderRadius:3,letterSpacing:"0.1em",fontWeight:700}}>{plan.tag}</span>
+            </div>
+            <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",marginBottom:4}}>
+              <div className="t-display" style={{fontSize:24,color:"#F4EFE3",letterSpacing:"0.04em"}}>{plan.title}</div>
+              <div className="t-display" style={{fontSize:28,color:plan.highlight?"#FBC531":"#F4EFE3",lineHeight:1}}>{plan.price}</div>
+            </div>
+            <div className="t-mono" style={{fontSize:9,opacity:0.6,letterSpacing:"0.06em"}}>{plan.sub}</div>
+            <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:6}}>
+              {plan.features.map((f,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:12}}>
+                  <div style={{width:16,height:16,borderRadius:8,flexShrink:0,background:plan.highlight?"#FBC531":"rgba(255,255,255,0.12)",color:plan.highlight?"#0B0E1A":"#F4EFE3",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700}}>✓</div>
+                  <span className="t-body" style={{opacity:0.85}}>{f}</span>
+                </div>
+              ))}
+            </div>
+            <FmpButton kind={plan.ctaKind} size="md" style={{marginTop:12,width:"100%",justifyContent:"center"}} onClick={nav.back}>{plan.cta}</FmpButton>
+          </div>
+        ))}
+      </div>
+      <div className="t-mono" style={{textAlign:"center",padding:"16px 18px 0",fontSize:9,opacity:0.5,letterSpacing:"0.06em"}}>Restauration d'achat · CGU · Confidentialité</div>
+    </div>
+  );
+}
+
+// ─── APP SHELL ───────────────────────────────────────────────
+function App() {
+  const [history, setHistory] = useState(["home"]);
+  const screen = history[history.length - 1];
+
+  const nav = {
+    go: useCallback((s) => setHistory(h => [...h, s]), []),
+    back: useCallback(() => setHistory(h => h.length > 1 ? h.slice(0, -1) : h), []),
+  };
+
+  const screens = {
+    "home":        <ScreenHome/>,
+    "teams":       <ScreenTeams/>,
+    "scan":        <ScreenScan/>,
+    "scan-result": <ScreenScanResult/>,
+    "album":       <ScreenAlbum/>,
+    "card-detail": <ScreenCardDetail/>,
+    "wishlist":    <ScreenWishlist/>,
+    "premium":     <ScreenPremium/>,
+  };
+
+  const isDark = ["scan","scan-result","card-detail","premium"].includes(screen);
+
+  return (
+    <NavCtx.Provider value={nav}>
+      <div className="app-shell">
+        <div className="phone">
+          {/* Dynamic island */}
+          <div style={{position:"absolute",top:11,left:"50%",transform:"translateX(-50%)",width:126,height:37,borderRadius:24,background:"#000",zIndex:50,pointerEvents:"none"}}/>
+          {/* Status bar */}
+          <StatusBar dark={isDark}/>
+          {/* Screen */}
+          <div className="screen" style={{paddingTop:0}}>
+            {screens[screen] || screens["home"]}
+          </div>
+          {/* Home indicator */}
+          <div style={{position:"absolute",bottom:0,left:0,right:0,zIndex:60,height:34,display:"flex",justifyContent:"center",alignItems:"flex-end",paddingBottom:8,pointerEvents:"none"}}>
+            <div style={{width:139,height:5,borderRadius:100,background:isDark?"rgba(255,255,255,0.7)":"rgba(0,0,0,0.2)"}}/>
+          </div>
+        </div>
+      </div>
+
+      {/* Premium CTA hint on desktop */}
+      <div style={{position:"fixed",bottom:24,right:24,zIndex:200}}>
+        <button onClick={()=>nav.go("premium")} style={{background:"linear-gradient(135deg,#FF3D2E,#C0301F)",color:"#F4EFE3",border:"none",borderRadius:24,padding:"10px 18px",fontFamily:"var(--display)",fontSize:14,letterSpacing:"0.06em",cursor:"pointer",boxShadow:"0 8px 24px rgba(255,61,46,0.4)",display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:12}}>◆</span> PRO — 2,99€/mois
+        </button>
+      </div>
+    </NavCtx.Provider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
