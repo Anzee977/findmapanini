@@ -1,0 +1,116 @@
+/* FindMyPanini — Stadium Energy design system */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --ink:    #0B0E1A;
+  --ink-2:  #14182A;
+  --paper:  #F4EFE3;
+  --paper-2:#EAE2D0;
+  --turf:   #0F5132;
+  --turf-2: #1A7A4D;
+  --fire:   #FF3D2E;
+  --sun:    #FBC531;
+  --sky:    #2D6BFF;
+  --violet: #6B3FA0;
+  --line:   rgba(11,14,26,0.12);
+  --line-2: rgba(11,14,26,0.06);
+
+  --display: "Bebas Neue", "Anton", Impact, sans-serif;
+  --body:    "Space Grotesk", system-ui, sans-serif;
+  --mono:    "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* halftone background */
+.halftone {
+  background-image: radial-gradient(circle at 50% 50%, currentColor 20%, transparent 22%);
+  background-size: 8px 8px;
+}
+.halftone-lg { background-size: 14px 14px; }
+
+/* diagonal stripes */
+.stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    currentColor 0 6px,
+    transparent 6px 12px
+  );
+}
+.stripes-fine {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    currentColor 0 2px,
+    transparent 2px 5px
+  );
+}
+
+/* chevron strip */
+.chevron-strip {
+  background:
+    linear-gradient(135deg, transparent 33%, currentColor 33% 66%, transparent 66%) 0 0 / 16px 16px,
+    linear-gradient(45deg,  transparent 33%, currentColor 33% 66%, transparent 66%) 0 0 / 16px 16px;
+}
+
+/* ticket perforation (used as separator) */
+.perforation {
+  background-image: radial-gradient(circle, currentColor 1.4px, transparent 1.6px);
+  background-size: 8px 8px;
+  background-repeat: repeat-x;
+  background-position: 0 50%;
+}
+
+/* sticker / card holo shine */
+.holo-shine {
+  background:
+    linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.55) 45%, rgba(255,255,255,0) 60%),
+    linear-gradient(135deg, #2D6BFF, #FF3D2E 40%, #FBC531 70%, #6B3FA0);
+  background-size: 200% 200%, 100% 100%;
+  animation: holo 3.6s linear infinite;
+}
+@keyframes holo {
+  0%   { background-position: 0% 0%, 0 0; }
+  100% { background-position: 200% 0%, 0 0; }
+}
+
+/* card flip */
+.flip-card { perspective: 1000px; }
+.flip-inner { position: relative; width:100%; height:100%; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+.flip-card.is-flipped .flip-inner { transform: rotateY(180deg); }
+.flip-face { position: absolute; inset:0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.flip-face.back { transform: rotateY(180deg); }
+
+/* missing sticker (frosted ghost) */
+.missing-shadow {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(11,14,26,0.18) 0%, transparent 50%),
+    rgba(255,255,255,0.55);
+  backdrop-filter: blur(3px);
+}
+
+/* utility text */
+.t-display { font-family: var(--display); font-weight: 400; letter-spacing: 0.01em; line-height: 0.95; }
+.t-body    { font-family: var(--body); }
+.t-mono    { font-family: var(--mono); font-weight: 500; letter-spacing: -0.02em; }
+
+* { -webkit-font-smoothing: antialiased; }
+
+/* page open animation for the album flip */
+@keyframes pageOpen {
+  0%   { transform: rotateY(0deg);   z-index: 5; }
+  100% { transform: rotateY(-170deg); z-index: 1; }
+}
+@keyframes pulseRing {
+  0%   { transform: scale(0.96); opacity: .8; }
+  100% { transform: scale(1.4);  opacity: 0;  }
+}
+@keyframes scanLine {
+  0%   { transform: translateY(0%); }
+  50%  { transform: translateY(100%); }
+  100% { transform: translateY(0%); }
+}
+@keyframes shineSweep {
+  0%   { transform: translateX(-120%) skewX(-15deg); }
+  100% { transform: translateX(220%)  skewX(-15deg); }
+}
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes spinSlow { to { transform: rotate(360deg); } }
