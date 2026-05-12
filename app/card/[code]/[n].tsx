@@ -71,7 +71,7 @@ export default function CardDetailScreen() {
               <PlayerPortrait code={code} n={n} name={player.name} pos={player.pos} size={120} owned />
               <Text style={styles.playerName}>{player.name}</Text>
               <Text style={styles.playerTeam}>{team.flag} {team.name}</Text>
-              {player.club && <Text style={styles.playerClub}>{player.club}</Text>}
+              {player.alias && <Text style={styles.playerClub}>{player.alias}</Text>}
             </View>
             <View style={styles.cardFooter}>
               <Text style={styles.flipHint}>Appuyer pour retourner →</Text>

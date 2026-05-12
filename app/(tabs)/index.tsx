@@ -2,6 +2,7 @@ import { FmpButton } from '@/components/FmpButton';
 import { ProgressDial } from '@/components/ProgressDial';
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSizes } from '@/constants/fonts';
+import { TOTAL_STICKERS } from '@/constants/data';
 import { useCollection } from '@/hooks/useCollection';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -38,7 +39,7 @@ function ActionTile({ icon, label, sub, color, onPress }: ActionTileProps) {
 export default function HomeScreen() {
   const router = useRouter();
   const collection = useCollection();
-  const progress = collection.getTotalProgress(960);
+  const progress = collection.getTotalProgress(TOTAL_STICKERS);
   const recent = collection.getRecentlyAdded(8);
 
   return (

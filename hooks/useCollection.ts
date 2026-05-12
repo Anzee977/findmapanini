@@ -164,7 +164,7 @@ export function useCollection(): UseCollectionReturn {
   );
 
   const getTotalProgress = useCallback(
-    (totalStickers = 960) => {
+    (totalStickers = 960 /* override via TOTAL_STICKERS */) => {
       const owned = Object.values(state.collection).reduce((sum, arr) => sum + arr.length, 0);
       return { owned, total: totalStickers, pct: totalStickers > 0 ? owned / totalStickers : 0 };
     },

@@ -70,7 +70,7 @@ export default function ScanResultScreen() {
               <PlayerPortrait code={code} n={n} name={player.name} pos={player.pos} size={100} owned />
               <Text style={styles.resultName}>{player.name}</Text>
               <Text style={styles.resultTeam}>{team.flag} {team.name}</Text>
-              {player.club && <Text style={styles.resultClub}>{player.club}</Text>}
+              {player.alias && <Text style={styles.resultClub}>{player.alias}</Text>}
             </View>
           </View>
 

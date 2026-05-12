@@ -1,5 +1,5 @@
 import { FlagBar } from '@/components/FlagBar';
-import { ALL_TEAMS } from '@/constants/data';
+import { ALL_TEAMS, TOTAL_STICKERS } from '@/constants/data';
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSizes } from '@/constants/fonts';
 import { useCollection } from '@/hooks/useCollection';
@@ -68,7 +68,7 @@ export default function TeamsScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <Text style={styles.title}>ALBUM CDM 2026</Text>
-        <Text style={styles.sub}>{ALL_TEAMS.length} équipes · 960 stickers</Text>
+        <Text style={styles.sub}>{ALL_TEAMS.length} équipes · {TOTAL_STICKERS} stickers</Text>
       </View>
 
       {/* Search */}

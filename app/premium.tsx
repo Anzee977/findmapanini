@@ -1,4 +1,5 @@
 import { FmpButton } from '@/components/FmpButton';
+import { ALL_TEAMS, TOTAL_STICKERS } from '@/constants/data';
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSizes } from '@/constants/fonts';
 import { useRouter } from 'expo-router';
@@ -71,7 +72,7 @@ export default function PremiumScreen() {
           price="0€"
           period="pour toujours"
           features={[
-            '48 équipes, 960 stickers',
+            `${ALL_TEAMS.length} équipes, ${TOTAL_STICKERS} stickers`,
             'Scanner caméra',
             'Album & wishlist',
             'Publicités',
