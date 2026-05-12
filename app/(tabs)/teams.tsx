@@ -1,5 +1,5 @@
 import { FlagBar } from '@/components/FlagBar';
-import { ALL_TEAMS, TOTAL_STICKERS } from '@/constants/data';
+import { ALL_TEAMS, TOTAL_STICKERS, TOTAL_SPECIAL_STICKERS } from '@/constants/data';
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSizes } from '@/constants/fonts';
 import { useCollection } from '@/hooks/useCollection';
@@ -89,6 +89,19 @@ export default function TeamsScreen() {
         numColumns={2}
         contentContainerStyle={styles.list}
         columnWrapperStyle={styles.row}
+        ListHeaderComponent={
+          <Pressable
+            onPress={() => router.push('/special')}
+            style={({ pressed }) => [styles.specialBanner, pressed && { opacity: 0.75 }]}
+          >
+            <Text style={styles.specialIcon}>⭐</Text>
+            <View style={styles.specialText}>
+              <Text style={styles.specialTitle}>Sections Spéciales</Text>
+              <Text style={styles.specialSub}>{TOTAL_SPECIAL_STICKERS} stickers foil · FWC, Coca-Cola, Extra</Text>
+            </View>
+            <Text style={styles.specialChevron}>›</Text>
+          </Pressable>
+        }
         renderItem={({ item }) => {
           const progress = collection.getTeamProgress(item.code, item.players.length);
           return (
@@ -149,6 +162,38 @@ const styles = StyleSheet.create({
   },
   row: {
     justifyContent: 'space-between',
+  },
+  specialBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.dark,
+    borderRadius: 14,
+    marginBottom: 12,
+    marginHorizontal: 2,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,215,0,0.3)',
+  },
+  specialIcon: { fontSize: 28 },
+  specialText: { flex: 1 },
+  specialTitle: {
+    fontFamily: Fonts.display,
+    fontSize: FontSizes.lg,
+    color: Colors.gold,
+    letterSpacing: 0.5,
+  },
+  specialSub: {
+    fontFamily: Fonts.body,
+    fontSize: FontSizes.xs,
+    color: Colors.gray400,
+    marginTop: 2,
+  },
+  specialChevron: {
+    fontFamily: Fonts.display,
+    fontSize: 24,
+    color: Colors.gold,
   },
   card: {
     width: '48%',

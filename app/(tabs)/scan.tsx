@@ -3,6 +3,7 @@ import { ALL_TEAMS } from '@/constants/data';
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSizes } from '@/constants/fonts';
 import { recognizeSticker } from '@/utils/recognizeSticker';
+import { recognizeStickerLocal, mlKitAvailable } from '@/utils/recognizeStickerLocal';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -63,24 +64,42 @@ export default function ScanScreen() {
     return () => loop.stop();
   }, []);
 
-  const handleRecognitionResult = (base64: string) => {
+  const handleCapture = async (uri: string, base64?: string) => {
     setRecognizing(true);
     setError(null);
-    recognizeSticker(base64, API_KEY).then(result => {
-      setRecognizing(false);
-      if ('type' in result) {
-        setError(result.message);
-      } else {
-        router.push({ pathname: '/scan-result', params: { code: result.code, n: String(result.n) } });
+    try {
+      // Try ML Kit first — free, offline
+      const local = await recognizeStickerLocal(uri);
+      if (!('type' in local)) {
+        router.push({ pathname: '/scan-result', params: { code: local.code, n: String(local.n) } });
+        return;
       }
-    });
+
+      // Fallback to Claude Vision API
+      if (API_KEY && base64) {
+        const cloud = await recognizeSticker(base64, API_KEY);
+        if (!('type' in cloud)) {
+          router.push({ pathname: '/scan-result', params: { code: cloud.code, n: String(cloud.n) } });
+          return;
+        }
+        setError(cloud.message);
+      } else {
+        setError(
+          local.type === 'no_key'
+            ? 'Scan natif non disponible. Ajoutez EXPO_PUBLIC_ANTHROPIC_KEY dans .env pour scanner via API.'
+            : local.message,
+        );
+      }
+    } finally {
+      setRecognizing(false);
+    }
   };
 
   const handleCameraShutter = async () => {
     if (recognizing || !cameraRef.current) return;
     try {
       const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.6, skipProcessing: true });
-      if (photo?.base64) handleRecognitionResult(photo.base64);
+      if (photo?.uri) handleCapture(photo.uri, photo.base64 ?? undefined);
     } catch {
       setError("Impossible de prendre la photo.");
     }
@@ -92,8 +111,8 @@ export default function ScanScreen() {
       base64: true,
       quality: 0.6,
     });
-    if (!result.canceled && result.assets[0]?.base64) {
-      handleRecognitionResult(result.assets[0].base64);
+    if (!result.canceled && result.assets[0]?.uri) {
+      handleCapture(result.assets[0].uri, result.assets[0].base64 ?? undefined);
     }
   };
 
@@ -171,7 +190,11 @@ export default function ScanScreen() {
               </View>
             ) : (
               <Text style={styles.hint}>
-                {API_KEY ? 'Pointez le sticker dans le cadre' : '⚠️ Clé API manquante — voir .env'}
+                {mlKitAvailable
+                  ? 'Scan gratuit · Hors ligne'
+                  : API_KEY
+                    ? 'Pointez le sticker dans le cadre · Via API Claude'
+                    : '⚠️ Build natif requis ou ajoutez EXPO_PUBLIC_ANTHROPIC_KEY'}
               </Text>
             )}
             <View style={styles.pills}>
@@ -190,7 +213,7 @@ export default function ScanScreen() {
             <Pressable
               onPress={handleCameraShutter}
               style={[styles.shutter, recognizing && styles.shutterDisabled]}
-              disabled={recognizing || !API_KEY}
+              disabled={recognizing || (!mlKitAvailable && !API_KEY)}
             >
               {recognizing
                 ? <ActivityIndicator color="#FFFFFF" />
@@ -234,11 +257,16 @@ export default function ScanScreen() {
             icon="🖼️"
             fullWidth
             onPress={handlePickPhoto}
-            disabled={recognizing || !API_KEY}
+            disabled={recognizing || (!mlKitAvailable && !API_KEY)}
           />
-          {!API_KEY && (
+          {!mlKitAvailable && !API_KEY && (
             <Text style={styles.apiHint}>
-              {'⚠️ Ajoutez EXPO_PUBLIC_ANTHROPIC_KEY dans .env pour activer la reconnaissance.'}
+              {'⚠️ Build natif requis (ML Kit) ou ajoutez EXPO_PUBLIC_ANTHROPIC_KEY dans .env.'}
+            </Text>
+          )}
+          {mlKitAvailable && (
+            <Text style={styles.apiHint}>
+              {'✓ Scan gratuit via ML Kit · Hors ligne · Sans compte requis'}
             </Text>
           )}
         </ScrollView>

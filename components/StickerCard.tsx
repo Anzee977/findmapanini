@@ -2,6 +2,7 @@ import { Colors, PositionColor } from '@/constants/colors';
 import { Fonts, FontSizes } from '@/constants/fonts';
 import { PlayerPortrait } from '@/components/PlayerPortrait';
 import type { Player } from '@/constants/data';
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -21,14 +22,25 @@ export function StickerCard({ teamCode, player, state, dupeCount = 0, onPress }:
   const isMissing = state === 'missing';
   const isDupe = state === 'dupe';
   const isWished = state === 'wished';
+  const isFoil = player.isFoil === true;
 
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
     >
+      {/* Foil background */}
+      {isFoil && (
+        <LinearGradient
+          colors={['#C9A227', '#FFE566', '#FFF8C0', '#FFD700', '#B8860B', '#FFD700']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+
       {/* Position color bar */}
-      <View style={[styles.posBar, { backgroundColor: posColor }]} />
+      <View style={[styles.posBar, { backgroundColor: isFoil ? 'rgba(0,0,0,0.25)' : posColor }]} />
 
       {/* Portrait */}
       <View style={styles.portraitWrap}>
@@ -50,12 +62,19 @@ export function StickerCard({ teamCode, player, state, dupeCount = 0, onPress }:
 
       {/* Number + name */}
       <View style={styles.info}>
-        <Text style={[styles.number, { color: posColor }]}>#{player.n}</Text>
-        <Text style={styles.name} numberOfLines={2}>
+        <Text style={[styles.number, { color: isFoil ? '#7A5800' : posColor }]}>#{player.n}</Text>
+        <Text style={[styles.name, isFoil && styles.nameFoil]} numberOfLines={2}>
           {player.name.split(' ').pop()}
         </Text>
-        <Text style={styles.pos}>{player.pos}</Text>
+        <Text style={[styles.pos, isFoil && styles.posFoil]}>{player.pos}</Text>
       </View>
+
+      {/* Foil badge */}
+      {isFoil && (
+        <View style={styles.foilBadge}>
+          <Text style={styles.foilBadgeText}>★</Text>
+        </View>
+      )}
 
       {/* Dupe badge */}
       {isDupe && dupeCount > 0 && (
@@ -143,11 +162,29 @@ const styles = StyleSheet.create({
     marginTop: 1,
     lineHeight: 13,
   },
+  nameFoil: { color: '#1A0A0A' },
   pos: {
     fontFamily: Fonts.mono,
     fontSize: 9,
     color: Colors.gray400,
     marginTop: 2,
+  },
+  posFoil: { color: '#7A5800' },
+  foilBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 5,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    borderRadius: 6,
+    width: 14,
+    height: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  foilBadgeText: {
+    fontSize: 8,
+    color: Colors.gold,
+    fontWeight: '700',
   },
   dupeBadge: {
     position: 'absolute',
