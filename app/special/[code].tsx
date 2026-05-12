@@ -2,6 +2,7 @@ import { StickerCard } from '@/components/StickerCard';
 import { SPECIAL_SECTIONS } from '@/constants/data';
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSizes } from '@/constants/fonts';
+import { useI18n } from '@/constants/i18n';
 import { useCollection } from '@/hooks/useCollection';
 import { haptic } from '@/hooks/useHaptics';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
@@ -18,18 +19,19 @@ import {
 
 type Filter = 'all' | 'missing' | 'dupes' | 'wishlist';
 
-const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'Toutes' },
-  { key: 'missing', label: 'Manquantes' },
-  { key: 'dupes', label: 'Doublons' },
-  { key: 'wishlist', label: 'Wishlist' },
-];
-
 export default function SpecialAlbumScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
   const navigation = useNavigation();
   const collection = useCollection();
+  const { t } = useI18n();
   const [filter, setFilter] = useState<Filter>('all');
+
+  const FILTERS: { key: Filter; label: string }[] = [
+    { key: 'all', label: t('filterAll') },
+    { key: 'missing', label: t('filterMissing') },
+    { key: 'dupes', label: t('filterDupes') },
+    { key: 'wishlist', label: t('filterWishlist') },
+  ];
 
   const section = useMemo(() => SPECIAL_SECTIONS.find(s => s.code === code), [code]);
 
@@ -54,7 +56,7 @@ export default function SpecialAlbumScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.center}>
-          <Text style={styles.error}>Section introuvable</Text>
+          <Text style={styles.error}>{t('specialNotFound')}</Text>
         </View>
       </SafeAreaView>
     );

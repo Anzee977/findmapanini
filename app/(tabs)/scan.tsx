@@ -2,6 +2,7 @@ import { FmpButton } from '@/components/FmpButton';
 import { ALL_TEAMS } from '@/constants/data';
 import { Colors } from '@/constants/colors';
 import { Fonts, FontSizes } from '@/constants/fonts';
+import { useI18n } from '@/constants/i18n';
 import { recognizeSticker } from '@/utils/recognizeSticker';
 import { recognizeStickerLocal, mlKitAvailable } from '@/utils/recognizeStickerLocal';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -23,13 +24,6 @@ import {
 
 type ScanMode = 'camera' | 'photo' | 'number' | 'player';
 
-const MODES: { key: ScanMode; label: string; icon: string }[] = [
-  { key: 'camera', label: 'Caméra', icon: '📷' },
-  { key: 'photo', label: 'Photo', icon: '🖼️' },
-  { key: 'number', label: 'N°', icon: '🔢' },
-  { key: 'player', label: 'Joueur', icon: '⚽' },
-];
-
 // Read API key from Expo env (set EXPO_PUBLIC_ANTHROPIC_KEY in .env)
 const API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_KEY ?? '';
 
@@ -42,8 +36,16 @@ const ALL_PLAYERS = ALL_TEAMS.flatMap(team =>
 
 export default function ScanScreen() {
   const router = useRouter();
+  const { t } = useI18n();
   const [permission, requestPermission] = useCameraPermissions();
   const [mode, setMode] = useState<ScanMode>('camera');
+
+  const MODES: { key: ScanMode; label: string; icon: string }[] = [
+    { key: 'camera', label: t('scanCamera'), icon: '📷' },
+    { key: 'photo',  label: t('scanPhoto'),  icon: '🖼️' },
+    { key: 'number', label: t('scanNumber'), icon: '🔢' },
+    { key: 'player', label: t('scanPlayer'), icon: '⚽' },
+  ];
   const [teamCode, setTeamCode] = useState('');
   const [cardNum, setCardNum] = useState('');
   const [playerSearch, setPlayerSearch] = useState('');
@@ -142,11 +144,9 @@ export default function ScanScreen() {
         <SafeAreaView style={styles.safe}>
           <View style={styles.permWrap}>
             <Text style={styles.permEmoji}>📷</Text>
-            <Text style={styles.permTitle}>Accès caméra requis</Text>
-            <Text style={styles.permSub}>
-              FindMyPanini a besoin de la caméra pour scanner vos stickers.
-            </Text>
-            <FmpButton label="Autoriser" onPress={requestPermission} />
+            <Text style={styles.permTitle}>{t('scanPermTitle')}</Text>
+            <Text style={styles.permSub}>{t('scanPermSub')}</Text>
+            <FmpButton label={t('scanPermBtn')} onPress={requestPermission} />
           </View>
         </SafeAreaView>
       );
@@ -174,7 +174,7 @@ export default function ScanScreen() {
               {recognizing && (
                 <View style={styles.recognizingOverlay}>
                   <ActivityIndicator color={Colors.gold} size="large" />
-                  <Text style={styles.recognizingText}>Analyse…</Text>
+                  <Text style={styles.recognizingText}>{t('scanAnalyzing')}</Text>
                 </View>
               )}
             </View>
@@ -190,11 +190,7 @@ export default function ScanScreen() {
               </View>
             ) : (
               <Text style={styles.hint}>
-                {mlKitAvailable
-                  ? 'Scan gratuit · Hors ligne'
-                  : API_KEY
-                    ? 'Pointez le sticker dans le cadre · Via API Claude'
-                    : '⚠️ Build natif requis ou ajoutez EXPO_PUBLIC_ANTHROPIC_KEY'}
+                {mlKitAvailable ? t('scanHintFree') : API_KEY ? t('scanHintApi') : t('scanHintNone')}
               </Text>
             )}
             <View style={styles.pills}>
@@ -230,10 +226,8 @@ export default function ScanScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <ScrollView contentContainerStyle={styles.manualWrap}>
-          <Text style={styles.manualTitle}>Depuis la galerie</Text>
-          <Text style={styles.manualSub}>
-            Choisissez une photo d&apos;un sticker pour l&apos;identifier automatiquement.
-          </Text>
+          <Text style={styles.manualTitle}>{t('scanGalleryTitle')}</Text>
+          <Text style={styles.manualSub}>{t('scanGallerySub')}</Text>
           <View style={styles.pills}>
             {MODES.map(m => (
               <Pressable
@@ -253,22 +247,14 @@ export default function ScanScreen() {
             </View>
           )}
           <FmpButton
-            label={recognizing ? 'Analyse en cours…' : 'Choisir une photo'}
+            label={recognizing ? t('scanGalleryLoading') : t('scanGalleryBtn')}
             icon="🖼️"
             fullWidth
             onPress={handlePickPhoto}
             disabled={recognizing || (!mlKitAvailable && !API_KEY)}
           />
-          {!mlKitAvailable && !API_KEY && (
-            <Text style={styles.apiHint}>
-              {'⚠️ Build natif requis (ML Kit) ou ajoutez EXPO_PUBLIC_ANTHROPIC_KEY dans .env.'}
-            </Text>
-          )}
-          {mlKitAvailable && (
-            <Text style={styles.apiHint}>
-              {'✓ Scan gratuit via ML Kit · Hors ligne · Sans compte requis'}
-            </Text>
-          )}
+          {!mlKitAvailable && !API_KEY && <Text style={styles.apiHint}>{t('scanGalleryNoneNote')}</Text>}
+          {mlKitAvailable && <Text style={styles.apiHint}>{t('scanGalleryFreeNote')}</Text>}
         </ScrollView>
       </SafeAreaView>
     );
@@ -279,7 +265,7 @@ export default function ScanScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.manualWrap}>
-          <Text style={styles.manualTitle}>Recherche joueur</Text>
+          <Text style={styles.manualTitle}>{t('scanPlayerTitle')}</Text>
           <View style={styles.pills}>
             {MODES.map(m => (
               <Pressable
@@ -294,12 +280,12 @@ export default function ScanScreen() {
             ))}
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>NOM DU JOUEUR</Text>
+            <Text style={styles.inputLabel}>{t('scanPlayer').toUpperCase()}</Text>
             <TextInput
               style={styles.input}
               value={playerSearch}
               onChangeText={setPlayerSearch}
-              placeholder="ex: Mbappe, Messi…"
+              placeholder={t('scanPlayerPlaceholder')}
               placeholderTextColor={Colors.gray400}
               autoFocus
             />
@@ -328,11 +314,9 @@ export default function ScanScreen() {
               </Pressable>
             )}
             ListEmptyComponent={
-              playerSearch.length >= 2 ? (
-                <Text style={styles.emptyText}>Aucun joueur trouvé</Text>
-              ) : (
-                <Text style={styles.emptyText}>Saisissez au moins 2 caractères</Text>
-              )
+              <Text style={styles.emptyText}>
+                {playerSearch.length >= 2 ? t('scanPlayerEmpty') : t('scanPlayerMin')}
+              </Text>
             }
           />
         </View>
@@ -344,7 +328,7 @@ export default function ScanScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.manualWrap} keyboardShouldPersistTaps="handled">
-        <Text style={styles.manualTitle}>Saisie manuelle</Text>
+        <Text style={styles.manualTitle}>{t('scanManualTitle')}</Text>
         <View style={styles.pills}>
           {MODES.map(m => (
             <Pressable
@@ -364,31 +348,31 @@ export default function ScanScreen() {
           </View>
         )}
         <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>CODE ÉQUIPE</Text>
+          <Text style={styles.inputLabel}>{t('scanTeamCode')}</Text>
           <TextInput
             style={styles.input}
             value={teamCode}
             onChangeText={v => { setTeamCode(v); setError(null); }}
-            placeholder="ex: FRA"
+            placeholder={t('scanTeamPlaceholder')}
             autoCapitalize="characters"
             maxLength={4}
             placeholderTextColor={Colors.gray400}
           />
         </View>
         <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>NUMÉRO DE STICKER</Text>
+          <Text style={styles.inputLabel}>{t('scanStickerNum')}</Text>
           <TextInput
             style={styles.input}
             value={cardNum}
             onChangeText={v => { setCardNum(v); setError(null); }}
-            placeholder="1 – 20"
+            placeholder={t('scanStickerPlaceholder')}
             keyboardType="number-pad"
             maxLength={2}
             placeholderTextColor={Colors.gray400}
           />
         </View>
         <FmpButton
-          label="Identifier le sticker"
+          label={t('scanIdentify')}
           icon="🔍"
           fullWidth
           onPress={handleManualSubmit}
